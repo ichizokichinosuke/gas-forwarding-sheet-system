@@ -4,10 +4,13 @@ function sendEmail(emailDict, status) {
   else if (status == "2.リード") sheetName = "リード時送付メール";
 
   const sheetContent = SpreadsheetApp.getActive().getSheetByName(sheetName);
-  const sheetInfo = SpreadsheetApp.getActive().getSheetByName("info");
+  const recipient = searchEmailAddress(emailDict);
+  const subject = sheetContent.getRange(2,1).getValue();
+
   var content = sheetContent.getRange(2,2).getValue();
   var matchObj = new RegExp(/{\S*}/,'g');
   var matchList = content.match(matchObj);
+
   // Logger.log(matchList[0]);
   // Logger.log(matchList[1]);
   // Logger.log(matchList[2]);
@@ -21,10 +24,6 @@ function sendEmail(emailDict, status) {
     // Logger.log(columnVal);
     content = content.replaceAll(matchStr, recordVal);
   });
-
-  
-  const recipient = emailDict["メールアドレス"];
-  const subject = sheetContent.getRange(2,1).getValue();
   
   try {
     GmailApp.sendEmail(recipient, subject, content);
@@ -33,4 +32,13 @@ function sendEmail(emailDict, status) {
   catch(error){
     console.error(error);
   }
+}
+
+function searchEmailAddress (emailDict) {
+  for (const [col, val] of Object.entries(emailDict)) {
+    if (col.match(/メ(ール|アド).*/)) {
+      return val;
+    }
+  }
+  return;
 }
