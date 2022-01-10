@@ -6,8 +6,9 @@ function getGmail2SpreadSheet() {
   var sender = "report@calltree.jp";
   
   today = Utilities.formatDate( today, 'Asia/Tokyo', 'yyyy/MM/dd');
-  var searchQuery = "after:" + today;
-  searchQuery += " from:"+sender;
+  // var searchQuery = "after:" + today;
+  var searchQuery  = "from:"+sender;
+  // searchQuery += " from:"+sender;
 
   // var searchQuery = " from:"+sender;
   // searchQuery += " has:nouserlabels";
@@ -20,7 +21,6 @@ function getGmail2SpreadSheet() {
   processThreads(threads, apoSheet, leadSheet, infoSheet);
   searchMailerDaemon(commerce);
 }
-
 
 function processThreads(threads, apoSheet, leadSheet, infoSheet) {
   var apoCols = apoSheet.getRange(1,2,1,apoSheet.getLastColumn()-1).getValues()[0];
@@ -63,23 +63,23 @@ function forward2SheetDict(message, sheet, cols) {
   var emailDict = {}
   forwardArray[0] = lastRow;
   cols.forEach(function (col, colIdx){
-    var matchObj = new RegExp("［"+col+"］(.*)");
+    var matchObj = new RegExp("［"+col+"］(.*)", "g");
     // if(val == "備考") matchObj = new RegExp(searchKey+"(.*\n)*");
-    var matchStr = message.match(matchObj);
+    // var matchStr = message.match(matchObj);
+    var matchStr;
+    for (const match of message.matchAll(matchObj)){
+      matchStr = match
+    }
+
     if (matchStr === null) return;
 
-    // Logger.log("Match str");
-    // Logger.log(matchStr);
+    Logger.log("match str: "+matchStr);
     var forwardValue = matchStr[1].trim();
-    // var forwardColIdx = colIdx;
-    // var val = col;
-    // if (forwardColIdx == -1) continue;
     if (colIdx == -1) return;
     // Logger.log("Cols: %s", cols);
     // Logger.log("Val: %s", val);
     // Noカラムがあるため、ずらす
     forwardArray[colIdx+1] = forwardValue;
-    // if (type == 2) emailDict[val] = forwardValue;
     emailDict[col] = forwardValue;
     if (col==="電話番号" || col==="TEL") sheet.getRange(lastRow+1,colIdx+2,1,1).setNumberFormat("@");
   // }
