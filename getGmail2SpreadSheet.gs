@@ -6,14 +6,14 @@ function getGmail2SpreadSheet() {
   var sender = "report@calltree.jp";
   
   today = Utilities.formatDate( today, 'Asia/Tokyo', 'yyyy/MM/dd');
-  // var searchQuery = "after:" + today;
-  // searchQuery += " from:"+sender;
+  var searchQuery = "after:" + today;
+  searchQuery += " from:"+sender;
 
-  var searchQuery = " from:"+sender;
+  // var searchQuery = " from:"+sender;
   // searchQuery += " has:nouserlabels";
 
   var threads = GmailApp.search(searchQuery);
-  Logger.log(searchQuery);
+  // Logger.log(searchQuery);
   apoSheet = SpreadsheetApp.getActive().getSheetByName("アポ");
   leadSheet = SpreadsheetApp.getActive().getSheetByName("リード");
   

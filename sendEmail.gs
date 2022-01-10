@@ -59,7 +59,7 @@ function getInChargeAddress(emailDict) {
 
 function searchEmailAddress (emailDict) {
   for (const [col, val] of Object.entries(emailDict)) {
-    if (col.match(/メ(ール|アド).*/)) {
+    if (col.match(/^メ(ール|アド).*/)) {
       return val;
     }
   }
