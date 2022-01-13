@@ -6,9 +6,9 @@ function getGmail2SpreadSheet() {
   var sender = "report@calltree.jp";
   
   today = Utilities.formatDate( today, 'Asia/Tokyo', 'yyyy/MM/dd');
-  // var searchQuery = "after:" + today;
-  var searchQuery  = "from:"+sender;
-  // searchQuery += " from:"+sender;
+  var searchQuery = "after:" + today;
+  // var searchQuery  = "from:"+sender;
+  searchQuery += " from:"+sender;
 
   // var searchQuery = " from:"+sender;
   // searchQuery += " has:nouserlabels";
@@ -59,9 +59,9 @@ function processThreads(threads, apoSheet, leadSheet, infoSheet) {
 
 function forward2SheetDict(message, sheet, cols) {
   var forwardArray = new Array(sheet.getLastColumn());
-  var lastRow = sheet.getLastRow();
+  var lastRow = getLastRowinNoCol(sheet);
   var emailDict = {}
-  forwardArray[0] = lastRow;
+  forwardArray[0] = "=ROW()-1";
   cols.forEach(function (col, colIdx){
     var matchObj = new RegExp("［"+col+"］(.*)", "g");
     // if(val == "備考") matchObj = new RegExp(searchKey+"(.*\n)*");
@@ -71,9 +71,10 @@ function forward2SheetDict(message, sheet, cols) {
       matchStr = match
     }
 
-    if (matchStr === null) return;
+    if (matchStr === undefined || matchStr === null) return;
 
     Logger.log("match str: "+matchStr);
+    Logger.log("column: "+col);
     var forwardValue = matchStr[1].trim();
     if (colIdx == -1) return;
     // Logger.log("Cols: %s", cols);
@@ -89,4 +90,9 @@ function forward2SheetDict(message, sheet, cols) {
   // Logger.log("Done");
   Logger.log(forwardArray);
   return emailDict;
+}
+
+function getLastRowinNoCol(sheet) {
+  const maxRow = sheet.getMaxRows();
+  return sheet.getRange(maxRow,1).getNextDataCell(SpreadsheetApp.Direction.UP).getRowIndex();
 }

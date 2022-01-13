@@ -15,14 +15,19 @@ function makeTrigger() {
   
   var triggerMinutes = sheet.getRange(2,6).getValue();
   
-  ScriptApp.newTrigger("getGmail2SpreadSheet")
-              .timeBased()
-              .everyMinutes(triggerMinutes)
-              .create();
+  var triggers = ScriptApp.getProjectTriggers();
+  
+  if (triggers.length === 0) {
+    ScriptApp.newTrigger("getGmail2SpreadSheet")
+                .timeBased()
+                .everyMinutes(triggerMinutes)
+                .create();
+  }
+
 
   // infoシートを基に以下の処理を実行
   // トリガー作成ステータスを完了に更新
-  makeSheetsFormat();
+  // makeSheetsFormat();
   // 新規ラベル作成
   GmailApp.createLabel("エラー処理済み");
 }

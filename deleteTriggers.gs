@@ -1,9 +1,9 @@
-function test() {
-  const str_1 = `abcd xyz\nefgh jkl\ xxx`;
-  const pattern = /abcd (.*)/g;
-  Logger.log(str_1);
-  Logger.log(str_1.matchAll(pattern));
-  for (const match of str_1.matchAll(pattern)){
-    Logger.log(match);
+function deleteTriggers() {
+  const infoSheet = SpreadsheetApp.getActive().getSheetByName("info");
+  var triggers = ScriptApp.getProjectTriggers();
+  for (const trigger of triggers) {
+    ScriptApp.deleteTrigger(trigger);
   }
+  infoSheet.getRange(14,1).setValue("未作成");
+
 }
