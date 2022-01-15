@@ -12,7 +12,7 @@ function sendEmail(emailDict, status) {
   const subject = sheetContent.getRange(2,1).getValue();
 
   var content = sheetContent.getRange(2,2).getValue();
-  var matchObj = new RegExp(/{\S*}/,'g');
+  var matchObj = new RegExp(/{\S*?}/,'g');
   var matchList = content.match(matchObj);
 
   // Logger.log(matchList[0]);
@@ -59,7 +59,7 @@ function getInChargeAddress(emailDict) {
 
 function searchEmailAddress (emailDict) {
   for (const [col, val] of Object.entries(emailDict)) {
-    if (col.match(/メ(ール|アド).*/)) {
+    if (col.match(/^メ(ール|アド).*/)) {
       return val;
     }
   }

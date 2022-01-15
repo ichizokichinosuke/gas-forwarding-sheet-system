@@ -6,21 +6,21 @@ function getGmail2SpreadSheet() {
   var sender = "report@calltree.jp";
   
   today = Utilities.formatDate( today, 'Asia/Tokyo', 'yyyy/MM/dd');
-  // var searchQuery = "after:" + today;
-  // searchQuery += " from:"+sender;
+  var searchQuery = "after:" + today;
+  // var searchQuery  = "from:"+sender;
+  searchQuery += " from:"+sender;
 
-  var searchQuery = " from:"+sender;
+  // var searchQuery = " from:"+sender;
   // searchQuery += " has:nouserlabels";
 
   var threads = GmailApp.search(searchQuery);
-  Logger.log(searchQuery);
+  // Logger.log(searchQuery);
   apoSheet = SpreadsheetApp.getActive().getSheetByName("アポ");
   leadSheet = SpreadsheetApp.getActive().getSheetByName("リード");
   
   processThreads(threads, apoSheet, leadSheet, infoSheet);
   searchMailerDaemon(commerce);
 }
-
 
 function processThreads(threads, apoSheet, leadSheet, infoSheet) {
   var apoCols = apoSheet.getRange(1,2,1,apoSheet.getLastColumn()-1).getValues()[0];
@@ -59,27 +59,28 @@ function processThreads(threads, apoSheet, leadSheet, infoSheet) {
 
 function forward2SheetDict(message, sheet, cols) {
   var forwardArray = new Array(sheet.getLastColumn());
-  var lastRow = sheet.getLastRow();
+  var lastRow = getLastRowinNoCol(sheet);
   var emailDict = {}
-  forwardArray[0] = lastRow;
+  forwardArray[0] = "=ROW()-1";
   cols.forEach(function (col, colIdx){
-    var matchObj = new RegExp("［"+col+"］(.*)");
+    var matchObj = new RegExp("［"+col+"］(.*)", "g");
     // if(val == "備考") matchObj = new RegExp(searchKey+"(.*\n)*");
-    var matchStr = message.match(matchObj);
-    if (matchStr === null) return;
+    // var matchStr = message.match(matchObj);
+    var matchStr;
+    for (const match of message.matchAll(matchObj)){
+      matchStr = match
+    }
 
-    // Logger.log("Match str");
-    // Logger.log(matchStr);
+    if (matchStr === undefined || matchStr === null) return;
+
+    Logger.log("match str: "+matchStr);
+    Logger.log("column: "+col);
     var forwardValue = matchStr[1].trim();
-    // var forwardColIdx = colIdx;
-    // var val = col;
-    // if (forwardColIdx == -1) continue;
     if (colIdx == -1) return;
     // Logger.log("Cols: %s", cols);
     // Logger.log("Val: %s", val);
     // Noカラムがあるため、ずらす
     forwardArray[colIdx+1] = forwardValue;
-    // if (type == 2) emailDict[val] = forwardValue;
     emailDict[col] = forwardValue;
     if (col==="電話番号" || col==="TEL") sheet.getRange(lastRow+1,colIdx+2,1,1).setNumberFormat("@");
   // }
@@ -89,4 +90,9 @@ function forward2SheetDict(message, sheet, cols) {
   // Logger.log("Done");
   Logger.log(forwardArray);
   return emailDict;
+}
+
+function getLastRowinNoCol(sheet) {
+  const maxRow = sheet.getMaxRows();
+  return sheet.getRange(maxRow,1).getNextDataCell(SpreadsheetApp.Direction.UP).getRowIndex();
 }

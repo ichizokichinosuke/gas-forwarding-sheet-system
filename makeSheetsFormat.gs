@@ -1,4 +1,4 @@
-function makeSheets() {
+function makeSheetsFormat() {
   var spreadSheet = SpreadsheetApp.getActive()
   var sheet = spreadSheet.getSheetByName('info');
   var lastCol = sheet.getLastColumn()+1;
@@ -14,8 +14,10 @@ function makeSheets() {
   apoColumns = apoColumns.filter(v => v[0]);
   leadColumns = leadColumns.filter(v => v[0]);
 
-  var apoSheet = spreadSheet.insertSheet("アポ");
-  var leadSheet = spreadSheet.insertSheet("リード");
+  // var apoSheet = spreadSheet.insertSheet("アポ");
+  // var leadSheet = spreadSheet.insertSheet("リード");
+  var apoSheet = spreadSheet.getSheetByName("アポ");
+  var leadSheet = spreadSheet.getSheetByName("リード");
 
   apoSheet.getRange(1,1,1,apoColumns[0].length).setValues(apoColumns);
   leadSheet.getRange(1,1,1,leadColumns[0].length).setValues(leadColumns);
