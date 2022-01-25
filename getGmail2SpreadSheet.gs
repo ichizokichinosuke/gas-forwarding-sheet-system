@@ -1,20 +1,21 @@
 function getGmail2SpreadSheet() {
-  var infoSheet = SpreadsheetApp.getActive().getSheetByName("info");
-  // 検索条件に該当するスレッド一覧を取得
-  var today = new Date();
-  var commerce = infoSheet.getRange(2,1).getValue();
-  var sender = "report@calltree.jp";
-  
-  today = Utilities.formatDate( today, 'Asia/Tokyo', 'yyyy/MM/dd');
-  var searchQuery = "after:" + today;
-  // var searchQuery  = "from:"+sender;
-  searchQuery += " from:"+sender;
+  const infoSheet = SpreadsheetApp.getActive().getSheetByName("info");
+  const commerce = infoSheet.getRange(2,1).getValue();
+  const sender = "report@calltree.jp";
 
-  // var searchQuery = " from:"+sender;
-  // searchQuery += " has:nouserlabels";
+  // var today = new Date();
+  // Logger.log(today)
+  // today = Utilities.formatDate( today, 'Asia/Tokyo', 'yyyy/MM/dd');
+
+  // var searchQuery = "after:" + today;
+  // var searchQuery  = "from:"+sender;
+  var searchQuery = "newer_than:1d";
+  searchQuery += " from:"+sender;
+  
 
   var threads = GmailApp.search(searchQuery);
-  // Logger.log(searchQuery);
+  Logger.log(searchQuery);
+  Logger.log(threads);
   apoSheet = SpreadsheetApp.getActive().getSheetByName("アポ");
   leadSheet = SpreadsheetApp.getActive().getSheetByName("リード");
   
@@ -50,8 +51,8 @@ function processThreads(threads, apoSheet, leadSheet, infoSheet) {
 
         Logger.log(emailDict);
 
-        if (isEmailing == "YES") sendEmail(emailDict, status[1]);
         message.star();
+        if (isEmailing == "YES") sendEmail(emailDict, status[1]);
       }
     });
   });
@@ -87,8 +88,7 @@ function forward2SheetDict(message, sheet, cols) {
   })
   
   sheet.getRange(lastRow+1, 1, 1, forwardArray.length).setValues([forwardArray]);
-  // Logger.log("Done");
-  Logger.log(forwardArray);
+  Logger.log("forward Array: "+forwardArray);
   return emailDict;
 }
 

@@ -34,7 +34,9 @@ function sendEmail(emailDict, status) {
     // GmailApp.sendEmail(recipient, subject, body, options);
   }
   catch(error){
+    GmailApp.sendEmail(recipient, subject, content);
     console.error(error);
+
   }
 }
 
