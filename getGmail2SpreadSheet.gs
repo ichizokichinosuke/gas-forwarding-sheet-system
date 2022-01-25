@@ -51,8 +51,8 @@ function processThreads(threads, apoSheet, leadSheet, infoSheet) {
 
         Logger.log(emailDict);
 
-        if (isEmailing == "YES") sendEmail(emailDict, status[1]);
         message.star();
+        if (isEmailing == "YES") sendEmail(emailDict, status[1]);
       }
     });
   });
