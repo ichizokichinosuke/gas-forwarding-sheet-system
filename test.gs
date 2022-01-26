@@ -12,9 +12,22 @@ function test() {
   // for (const trigger of triggers) {
   //   ScriptApp.deleteTrigger(trigger);
   // }
-  const apoSheet = SpreadsheetApp.getActive().getSheetByName("アポ");
-  const leadSheet = SpreadsheetApp.getActive().getSheetByName("リード");
+  // const apoSheet = SpreadsheetApp.getActive().getSheetByName("アポ");
+  // const leadSheet = SpreadsheetApp.getActive().getSheetByName("リード");
 
-  Logger.log(apoSheet.getLastRow());
-  Logger.log(leadSheet.getLastRow());
+  // Logger.log(apoSheet.getLastRow());
+  // Logger.log(leadSheet.getLastRow());
+  // var x = ["a", "b", "c"];
+  // var y = [1,2,3];
+  // var z = {}
+  // Logger.log(x);
+  // Logger.log(y);
+
+  // for (var i=0; i<x.length; i++) {
+  //   z[x[i]] = y[i]
+  // }
+  // Logger.log(z);
+
+  Logger.log("メール送付".match(/^メ(ール|アド)(アドレス)?$/));
+
 }

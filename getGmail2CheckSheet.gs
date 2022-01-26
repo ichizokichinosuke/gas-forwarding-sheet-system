@@ -1,23 +1,14 @@
-function getGmail2SpreadSheet() {
+function getGmail2CheckSheet() {
   const infoSheet = SpreadsheetApp.getActive().getSheetByName("info");
   const commerce = infoSheet.getRange(2,1).getValue();
   const sender = "report@calltree.jp";
-
-  // var today = new Date();
-  // Logger.log(today)
-  // today = Utilities.formatDate( today, 'Asia/Tokyo', 'yyyy/MM/dd');
-
-  // var searchQuery = "after:" + today;
-  // var searchQuery  = "from:"+sender;
   var searchQuery = "newer_than:1d";
   searchQuery += " from:"+sender;
-  
-
   var threads = GmailApp.search(searchQuery);
   Logger.log(searchQuery);
   Logger.log(threads);
-  apoSheet = SpreadsheetApp.getActive().getSheetByName("アポ");
-  leadSheet = SpreadsheetApp.getActive().getSheetByName("リード");
+  apoSheet = SpreadsheetApp.getActive().getSheetByName("Check アポ");
+  leadSheet = SpreadsheetApp.getActive().getSheetByName("Check アポ");
   
   processThreads(threads, apoSheet, leadSheet, infoSheet);
   searchMailerDaemon(commerce);
@@ -52,7 +43,7 @@ function processThreads(threads, apoSheet, leadSheet, infoSheet) {
         Logger.log(emailDict);
 
         message.star();
-        if (isEmailing == "YES") sendEmail(emailDict, status[1]);
+        // if (isEmailing == "YES") sendEmail(emailDict, status[1]);
       }
     });
   });
@@ -92,3 +83,7 @@ function forward2SheetDict(message, sheet, cols) {
   return emailDict;
 }
 
+function getLastRowinNoCol(sheet) {
+  const maxRow = sheet.getMaxRows();
+  return sheet.getRange(maxRow,1).getNextDataCell(SpreadsheetApp.Direction.UP).getRowIndex();
+}

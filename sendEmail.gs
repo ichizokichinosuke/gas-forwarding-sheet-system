@@ -1,3 +1,72 @@
+function sendEmailfromSheet() {
+  // const sheet = SpreadsheetApp.getActiveSheet();
+  const sheet = SpreadsheetApp.getActive().getSheetByName("アポ");
+  const sheetName = sheet.getSheetName();
+  
+  const LAST_COL = sheet.getLastColumn();
+  const LAST_ROW = getLastRowinNoCol(sheet);
+  const isSentColName = "メール送付";
+  // apoSheet.getRange(apoSheet.getLastRow(),1,forwardValues.length,LAST_COL).setValues(forwardValues);
+
+  const allData = sheet.getRange(1,1,LAST_ROW,LAST_COL).getValues();
+  const columns = allData[0];
+  const isSentIdx = columns.indexOf(isSentColName);
+  // Logger.log(columns);
+  // Logger.log(allData);
+  // const forwardValues = sheet.getRange(2,1,LAST_ROW-1,LAST_COL).getValues();
+  var forwardValues;
+  if (allData.length <= 2) forwardValues = [allData[1]];
+  else forwardValues = allData.slice(1);
+  
+  const falseIdxs = forwardValues.flatMap((record,idx) => record[isSentIdx]==false ? idx:[]);
+  Logger.log(falseIdxs);
+  for(const idx of falseIdxs) {
+    const record = forwardValues[idx];
+    const emailDict = makeDict(record, columns);
+    // Logger.log(emailDict);
+    // sendEmailfromRecord(emailDict, sheetName);
+    Logger.log("idx: "+idx+", isSentIdx: "+isSentIdx);
+    sheet.getRange(idx+2, isSentIdx+1).setValue(true);
+  }
+}
+
+function sendEmailfromRecord(emailDict, sheetName) {
+  if (sheetName === "アポ") {
+    var mailTemplateSheet = SpreadsheetApp.getActive().getSheetByName("アポ時送付メール");
+    var inChargeAddress = getInChargeAddress(emailDict);
+  } else {
+    var mailTemplateSheet = SpreadsheetApp.getActive().getSheetByName("リード時送付メール");
+  }
+
+  const subject = mailTemplateSheet.getRange(2,1).getValue();
+  const recipient = searchEmailAddress(emailDict);
+  Logger.log("recipient: "+recipient);
+
+  var content = mailTemplateSheet.getRange(2,2).getValue();
+  const matchObj = new RegExp(/{\S*?}/,'g');
+  const matchList = content.match(matchObj);
+
+  matchList.forEach(function(matchStr, idx){
+    var columnVal = matchStr.slice(1,matchStr.length-1);
+    var recordVal;
+    if (typeof emailDict[columnVal] === 'undefined') recordVal = "";
+    else recordVal = emailDict[columnVal]
+    // Logger.log(matchStr);
+    // Logger.log(columnVal);
+    content = content.replaceAll(matchStr, recordVal);
+  });
+  
+  try {
+    GmailApp.sendEmail(recipient, subject, content, {cc: inChargeAddress});
+    // GmailApp.sendEmail(recipient, subject, body, options);
+  }
+  catch(error){
+    GmailApp.sendEmail(recipient, subject, content);
+    console.error(error);
+
+  }
+}
+
 function sendEmail(emailDict, status) {
   var sheetName;
   var inChargeAddress;
@@ -40,6 +109,25 @@ function sendEmail(emailDict, status) {
   }
 }
 
+function getPatternIdx(array, pattern) {
+  var counter = 0;
+  for (const val of array) {
+    if (val.match(pattern)) {
+      return counter;
+    }
+    counter++;
+  }
+  return;
+}
+
+function makeDict(record, columns) {
+  var dict = {};
+  for (var i=0; i<columns.length; i++) {
+    dict[columns[i]] = record[i];
+  }
+  return dict;
+}
+
 function getInChargeAddress(emailDict) {
   var inChargeName;
   for (const [col, val] of Object.entries(emailDict)) {
@@ -49,8 +137,8 @@ function getInChargeAddress(emailDict) {
       const lastRow = iciSheet.getLastRow();
       var allInChargeNames = iciSheet.getRange(2,2,lastRow-1,1).getValues();
       allInChargeNames = allInChargeNames.map(v => v[0]);
-      Logger.log(lastRow);
-      Logger.log(allInChargeNames);
+      // Logger.log(lastRow);
+      // Logger.log(allInChargeNames);
       const rowIdx = allInChargeNames.indexOf(inChargeName);
       const inChargeAddress = iciSheet.getRange(rowIdx+2,3).getValue();
       return inChargeAddress;
@@ -61,7 +149,7 @@ function getInChargeAddress(emailDict) {
 
 function searchEmailAddress (emailDict) {
   for (const [col, val] of Object.entries(emailDict)) {
-    if (col.match(/^メ(ール|アド).*/)) {
+    if (col.match(/^メ(ール|アド)(アドレス)?$/)) {
       return val;
     }
   }
