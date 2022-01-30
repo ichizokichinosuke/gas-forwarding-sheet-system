@@ -1,30 +1,31 @@
 function sendEmailfromSheet() {
-  // const sheet = SpreadsheetApp.getActiveSheet();
-  const sheet = SpreadsheetApp.getActive().getSheetByName("アポ");
+  const sheet = SpreadsheetApp.getActiveSheet();
+  // const sheet = SpreadsheetApp.getActive().getSheetByName("アポ");
+  
   const sheetName = sheet.getSheetName();
+  var response = alertSendEmail();
+  
+  if (response == "NO") return;
   
   const LAST_COL = sheet.getLastColumn();
   const LAST_ROW = getLastRowinNoCol(sheet);
   const isSentColName = "メール送付";
-  // apoSheet.getRange(apoSheet.getLastRow(),1,forwardValues.length,LAST_COL).setValues(forwardValues);
 
   const allData = sheet.getRange(1,1,LAST_ROW,LAST_COL).getValues();
   const columns = allData[0];
   const isSentIdx = columns.indexOf(isSentColName);
   // Logger.log(columns);
   // Logger.log(allData);
-  // const forwardValues = sheet.getRange(2,1,LAST_ROW-1,LAST_COL).getValues();
   var forwardValues;
-  if (allData.length <= 2) forwardValues = [allData[1]];
-  else forwardValues = allData.slice(1);
+  forwardValues = allData.slice(1);
   
   const falseIdxs = forwardValues.flatMap((record,idx) => record[isSentIdx]==false ? idx:[]);
-  Logger.log(falseIdxs);
+  // Logger.log(falseIdxs);
   for(const idx of falseIdxs) {
     const record = forwardValues[idx];
     const emailDict = makeDict(record, columns);
     // Logger.log(emailDict);
-    // sendEmailfromRecord(emailDict, sheetName);
+    sendEmailfromRecord(emailDict, sheetName);
     Logger.log("idx: "+idx+", isSentIdx: "+isSentIdx);
     sheet.getRange(idx+2, isSentIdx+1).setValue(true);
   }
@@ -50,20 +51,23 @@ function sendEmailfromRecord(emailDict, sheetName) {
     var columnVal = matchStr.slice(1,matchStr.length-1);
     var recordVal;
     if (typeof emailDict[columnVal] === 'undefined') recordVal = "";
+    else if (Object.prototype.toString.call(emailDict[columnVal]) === "[object Date]") {
+      recordVal = Utilities.formatDate(emailDict[columnVal], 'JST', 'MM/dd');
+    }
     else recordVal = emailDict[columnVal]
-    // Logger.log(matchStr);
-    // Logger.log(columnVal);
+    // Logger.log(recordVal)
+    // Logger.log(typeof recordVal)
+    // Logger.log(Object.prototype.toString.call(recordVal))
+
     content = content.replaceAll(matchStr, recordVal);
   });
   
   try {
     GmailApp.sendEmail(recipient, subject, content, {cc: inChargeAddress});
-    // GmailApp.sendEmail(recipient, subject, body, options);
   }
   catch(error){
     GmailApp.sendEmail(recipient, subject, content);
     console.error(error);
-
   }
 }
 
@@ -107,25 +111,6 @@ function sendEmail(emailDict, status) {
     console.error(error);
 
   }
-}
-
-function getPatternIdx(array, pattern) {
-  var counter = 0;
-  for (const val of array) {
-    if (val.match(pattern)) {
-      return counter;
-    }
-    counter++;
-  }
-  return;
-}
-
-function makeDict(record, columns) {
-  var dict = {};
-  for (var i=0; i<columns.length; i++) {
-    dict[columns[i]] = record[i];
-  }
-  return dict;
 }
 
 function getInChargeAddress(emailDict) {

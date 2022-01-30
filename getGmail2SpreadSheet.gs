@@ -52,7 +52,7 @@ function processThreads(threads, apoSheet, leadSheet, infoSheet) {
         Logger.log(emailDict);
 
         message.star();
-        if (isEmailing == "YES") sendEmail(emailDict, status[1]);
+        // if (isEmailing == "YES") sendEmail(emailDict, status[1]);
       }
     });
   });
